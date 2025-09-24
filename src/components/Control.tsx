@@ -1,42 +1,45 @@
-import { useState } from "react";
-import type { ControlProps } from "./types";
+import { useState, useRef } from "react";
 
-export default function Control({messages, setMessages}: ControlProps) {
-  const [message, setMessage] = useState<string>('');
+type ControlProps = {
+  addMessage: (text: string) => void;
+}
 
-  function handleClick() {
-    const newMessages = [...messages, {
-      sender: 'human',
-      id: Date.now(),
-      text: message,
-    }];
+export default function Control({addMessage}: ControlProps) {
+  const [message, setMessage] = useState('');
+  const focusRef = useRef<HTMLInputElement>(null);
 
-    setMessages(newMessages);
+  const handleClick = () => {
+    if (!message) return;
+      focusRef.current?.focus();
+    addMessage(message);
     setMessage('');
-
-    setTimeout(() => {
-      setMessages(prev => [
-        ...prev, 
-        {
-          sender: 'bot',
-          id: Date.now(),
-          text: message,
-        }
-      ]);
-    }, 1000)
   }
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(e.target.value);
   }
 
+  const handleEnterDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleClick();
+    }
+  }
+
   return (
-    <>
+    <div className="control-div">
       <input 
+        ref={focusRef}
         onChange={handleChange}
         value={message}
+        className="message-input"
+        onKeyDown= {handleEnterDown}
       />
-      <button onClick={handleClick}>Send</button>
-    </>
+      <button 
+      onClick={handleClick}
+      className="send-btn"
+      >Send</button>
+    </div>
   );
 }
+
+// Привет! Я - сообщение в чате!
